@@ -10,7 +10,7 @@ export class CategoryService {
   constructor(
     @InjectModel(Category.name)
     private categoryModel: Model<Category>,
-  ) {}
+  ) { }
 
   async create(dto: CreateCategoryDto): Promise<Category> {
     const newCat = new this.categoryModel(dto);
@@ -43,5 +43,32 @@ export class CategoryService {
     const deleted = await this.categoryModel.findByIdAndDelete(id);
 
     if (!deleted) throw new NotFoundException('Category not found');
+  }
+
+  async findAllTree() {
+    const categories = await this.categoryModel.find().lean();
+
+    const map: Record<string, any> = {};
+    const tree: any[] = [];
+
+    categories.forEach(cat => {
+      const id = cat._id.toString();
+      map[id] = { ...cat, children: [] };
+    });
+
+    categories.forEach(cat => {
+      const id = cat._id.toString();
+
+      if (cat.parent) {
+        const parentId = cat.parent.toString();
+        if (map[parentId]) {
+          map[parentId].children.push(map[id]);
+        }
+      } else {
+        tree.push(map[id]);
+      }
+    });
+
+    return tree;
   }
 }
