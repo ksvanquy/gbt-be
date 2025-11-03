@@ -8,7 +8,7 @@ export class Category extends Document {
 
   @Prop({
     required: true,
-    enum: ['grade', 'subject', 'program', 'custom']
+    enum: ['grade', 'subject', 'book', 'course', 'program', 'custom']
   })
   type: string;
 
